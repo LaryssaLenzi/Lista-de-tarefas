@@ -1,14 +1,24 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const path = require('path'); 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
 
-app.use(express.static('public'));
-app.use(express.static('.')); 
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+        if (err) {
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        }
+    });
+});
+
 
 
 const db = new sqlite3.Database('tarefas.db');
@@ -31,10 +41,8 @@ app.get('/tarefas', (req, res) => {
 
 app.post('/tarefas', (req, res) => {
     const { nome, custo, data_limite } = req.body;
-
     db.get("SELECT MAX(ordem) as max FROM tarefas", [], (err, row) => {
         const ordem = (row ? row.max : 0) + 1;
-
         db.run(
             "INSERT INTO tarefas (nome, custo, data_limite, ordem) VALUES (?, ?, ?, ?)",
             [nome, custo, data_limite, ordem],
@@ -46,6 +54,42 @@ app.post('/tarefas', (req, res) => {
     });
 });
 
+app.put('/tarefas/:id', (req, res) => {
+    const { nome, custo, data_limite } = req.body;
+    const id = req.params.id;
+    db.run(
+        "UPDATE tarefas SET nome = ?, custo = ?, data_limite = ? WHERE id = ?",
+        [nome, custo, data_limite, id],
+        function(err) {
+            if (err) return res.status(500).json(err);
+            res.json({ changes: this.changes });
+        }
+    );
+});
+
+app.delete('/tarefas/:id', (req, res) => {
+    const id = req.params.id;
+    db.run("DELETE FROM tarefas WHERE id = ?", [id], function(err) {
+        if (err) return res.status(500).json(err);
+        res.json({ changes: this.changes });
+    });
+});
+
+app.put('/tarefas/reordenar', (req, res) => {
+    const novasOrdens = req.body;
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+        const stmt = db.prepare("UPDATE tarefas SET ordem = ? WHERE id = ?");
+        try {
+            novasOrdens.forEach(t => stmt.run(t.ordem, t.id));
+            stmt.finalize();
+            db.run("COMMIT", () => res.json({ ok: true }));
+        } catch (e) {
+            db.run("ROLLBACK");
+            res.status(500).json({ error: e.message });
+        }
+    });
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
