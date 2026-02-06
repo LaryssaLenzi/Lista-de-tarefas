@@ -13,13 +13,9 @@ app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Public', 'index.html'), (err) => {
-        if (err) {
-            res.sendFile(path.join(__dirname, 'public', 'index.html'), (err2) => {
-                if (err2) {
-                    res.sendFile(path.join(__dirname, 'index.html'));
-                }
-            });
-        }
+        if (err) res.sendFile(path.join(__dirname, 'public', 'index.html'), (err2) => {
+            if (err2) res.sendFile(path.join(__dirname, 'index.html'));
+        });
     });
 });
 
@@ -34,6 +30,7 @@ CREATE TABLE IF NOT EXISTS tarefas (
     ordem INTEGER NOT NULL
 )`);
 
+
 app.get('/tarefas', (req, res) => {
     db.all("SELECT * FROM tarefas ORDER BY ordem", [], (err, rows) => {
         if (err) return res.status(500).json(err);
@@ -45,15 +42,34 @@ app.post('/tarefas', (req, res) => {
     const { nome, custo, data_limite } = req.body;
     db.get("SELECT MAX(ordem) as max FROM tarefas", [], (err, row) => {
         const ordem = (row ? row.max : 0) + 1;
-        db.run(
-            "INSERT INTO tarefas (nome, custo, data_limite, ordem) VALUES (?, ?, ?, ?)",
-            [nome, custo, data_limite, ordem],
-            (err) => {
-                if (err) return res.status(400).json(err);
-                res.json({ ok: true });
+        db.run("INSERT INTO tarefas (nome, custo, data_limite, ordem) VALUES (?, ?, ?, ?)", 
+        [nome, custo, data_limite, ordem], (err) => {
+            if (err) {
+                if (err.message.includes('UNIQUE')) return res.status(400).json({ error: "Nome duplicado" });
+                return res.status(400).json(err);
             }
-        );
+            res.json({ ok: true });
+        });
     });
+});
+
+app.put('/tarefas/:id', (req, res) => {
+    const { nome, custo, data_limite } = req.body;
+    const id = req.params.id;
+
+    db.run(
+        "UPDATE tarefas SET nome = ?, custo = ?, data_limite = ? WHERE id = ?",
+        [nome, custo, data_limite, id],
+        function(err) {
+            if (err) {
+                if (err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: "Já existe outra tarefa com esse nome." });
+                }
+                return res.status(500).json(err);
+            }
+            res.json({ changes: this.changes });
+        }
+    );
 });
 
 app.delete('/tarefas/:id', (req, res) => {
