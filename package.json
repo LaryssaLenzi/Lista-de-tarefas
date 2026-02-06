@@ -1,17 +1,16 @@
 {
-  "name": "lista-de-tarefas",
+  "name": "lista-tarefas",
   "version": "1.0.0",
+  "description": "Projeto de Lista de Tarefas",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "sqlite3": "^5.1.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
