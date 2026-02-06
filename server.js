@@ -1,25 +1,27 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
-const path = require('path'); 
+const path = require('path');
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-
+app.use(express.static(path.join(__dirname, 'Public')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+    res.sendFile(path.join(__dirname, 'Public', 'index.html'), (err) => {
         if (err) {
-            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+            res.sendFile(path.join(__dirname, 'public', 'index.html'), (err2) => {
+                if (err2) {
+                    res.sendFile(path.join(__dirname, 'index.html'));
+                }
+            });
         }
     });
 });
-
-
 
 const db = new sqlite3.Database('tarefas.db');
 
@@ -52,19 +54,6 @@ app.post('/tarefas', (req, res) => {
             }
         );
     });
-});
-
-app.put('/tarefas/:id', (req, res) => {
-    const { nome, custo, data_limite } = req.body;
-    const id = req.params.id;
-    db.run(
-        "UPDATE tarefas SET nome = ?, custo = ?, data_limite = ? WHERE id = ?",
-        [nome, custo, data_limite, id],
-        function(err) {
-            if (err) return res.status(500).json(err);
-            res.json({ changes: this.changes });
-        }
-    );
 });
 
 app.delete('/tarefas/:id', (req, res) => {
