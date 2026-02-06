@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Tarefas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>📋 Lista de Tarefas</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Custo (R$)</th>
+            <th>Data Limite</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="lista-tarefas">
+        </tbody>
+</table>
+
+<p id="total" style="font-weight: bold; margin-top: 10px;"></p>
+
+<button onclick="abrirFormulario()">➕ Incluir Nova Tarefa</button>
+
+<div id="formulario" style="display: none; border: 1px solid #ccc; padding: 15px; margin-top: 20px; background: #f9f9f9;">
+    <h3 id="titulo-form">Nova Tarefa</h3>
+    
+    <input type="hidden" id="id-tarefa">
+
+    <label>Nome:</label><br>
+    <input type="text" id="nome" placeholder="Ex: Comprar leite"><br><br>
+
+    <label>Custo (R$):</label><br>
+    <input type="number" id="custo" placeholder="0,00" step="0.01"><br><br>
+
+    <label>Data Limite:</label><br>
+    <input type="date" id="data_limite"><br><br>
+
+    <button onclick="salvarTarefa()" style="background-color: #1fdb58; color: white;">Salvar</button>
+    <button onclick="fecharFormulario()" style="background-color: #e05950; color: white;">Cancelar</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

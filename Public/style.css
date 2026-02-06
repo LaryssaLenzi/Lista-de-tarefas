@@ -1,0 +1,29 @@
+body { font-family: sans-serif; padding: 20px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
+
+.caro { background-color: #fff9c4; } 
+
+/* Botões de Ação */
+.btn-acao {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    padding: 0 5px;
+    transition: transform 0.1s;
+}
+.btn-acao:hover:not(:disabled) { transform: scale(1.2); }
+.btn-acao:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-del { color: #d32f2f; }
+.btn-edit { color: #1976D2; }
+.separador { margin: 0 8px; color: #ccc; }
+
+.acoes-col { text-align: center; white-space: nowrap; width: 180px; }
+
+tr[draggable="true"] { cursor: grab; }
+tr.dragging { opacity: 0.5; background-color: #e3f2fd; }
+tr.drag-over { border-top: 3px solid #2196F3; }
